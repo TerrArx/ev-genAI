@@ -1,8 +1,0 @@
-Problem Statement
-
-The project aims to explore how Generative Artificial Intelligence (GenAI) can be applied in the field of Electric Vehicle (EV) design and innovation.
-The main objective is to develop a model that learns patterns and relationships from existing EV data — such as battery capacity, range, price, and efficiency — and then generates new, realistic EV configurations that could exist in the market.
-
-By understanding the trade-offs between different vehicle parameters, the generative model can suggest plausible new EV variants suited to various conditions, such as budget, performance, or regional market needs (for example, affordable city EVs for India or long-range sedans for global use).
-
-This approach demonstrates how GenAI can support sustainable development and green mobility by helping manufacturers and researchers rapidly prototype EV concepts without extensive manual design or costly simulations. It combines the principles of data-driven learning and AI-powered creativity to push innovation in the electric mobility sector.
