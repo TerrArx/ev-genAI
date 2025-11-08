@@ -1,10 +1,6 @@
 # Data Processing, Feature Encoding, and CVAE Model Training
 
-This document summarizes the complete workflow for preparing the EV specifications dataset, engineering conditioning variables, scaling continuous targets, and training the Conditional Variational Autoencoder (CVAE) with β-annealing. It is meant to be a clear, self-contained reference suitable for inclusion in a research repository or production model pipeline.
-
----
-
-## 1. Dataset Preparation
+## 📦 Dataset Preparation
 
 ### 1.1 Source and Filtering
 
@@ -24,7 +20,7 @@ Rows missing any of these fields are removed.
 
 ---
 
-## 2. Feature Engineering
+## 🎛️ Feature Engineering
 
 ### 2.1 Region Grouping
 
@@ -70,7 +66,7 @@ Resulting Feature: **C_Budget**
 
 ---
 
-## 3. Model Target Variables
+## 🎯 Model Target Variables
 
 | Target Variable      | Units | Typical Range       |
 | -------------------- | ----- | ------------------- |
@@ -82,7 +78,7 @@ These form the **continuous output vector** modeled by the CVAE.
 
 ---
 
-## 4. Encoding and Scaling
+## 🔧 Encoding and Scaling
 
 Continuous targets are standardized. Categorical conditions are one-hot encoded and combined with binary-engineered indicators.
 
@@ -99,7 +95,7 @@ Final shapes used in the model:
 
 ---
 
-## 5. Conditional VAE Architecture
+## 🏗️ Conditional VAE Architecture
 
 The CVAE learns to reconstruct target vehicle specifications conditioned on design and contextual factors.
 
@@ -117,7 +113,7 @@ Reconstructs the continuous target specifications conditioned on the same catego
 
 ---
 
-## 6. β-Annealing Training Strategy
+## 🔥 β-Annealing Training Strategy
 
 A **β-annealing schedule** is used to gradually introduce the KL-divergence regularization to avoid posterior collapse.
 
@@ -131,7 +127,7 @@ This approach produces stable, disentangled latent structure while preserving ge
 
 ---
 
-## 7. Model Performance
+## 📈 Model Performance
 
 ### Standardized Scale Metrics
 
@@ -153,7 +149,7 @@ This confirms the model learned practical market and engineering tradeoffs.
 
 ---
 
-## 8. Model Usage
+## 🚀 Model Usage
 
 The trained decoder can synthesize new EV specifications conditioned on targeted design constraints such as:
 
@@ -166,7 +162,7 @@ This enables structured **EV concept generation and scenario modeling**.
 
 ---
 
-## 9. Summary
+## ✅ Summary
 
 | Component                        | Status |
 | -------------------------------- | ------ |
@@ -179,7 +175,7 @@ This enables structured **EV concept generation and scenario modeling**.
 
 ---
 
-## Next Potential Enhancements
+## 🔮 Next Potential Enhancements
 
 * Incorporate text-based brand embeddings
 * Add normalizing-flow layers to improve output sharpness
