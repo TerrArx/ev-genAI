@@ -2,43 +2,42 @@
    CSS VARIABLES FOR THEME SUPPORT
    ============================================ */
 
-/* Default to dark mode for better compatibility */
-:root {
-    --bg-primary: #1a1a1a;
-    --bg-secondary: #252525;
+/* Default to dark mode */
+:root, [data-theme="dark"] {
+    --bg-primary: #0e0e0e;
+    --bg-secondary: #1a1a1a;
     --text-primary: #ffffff;
-    --text-secondary: #cccccc;
-    --text-tertiary: #888888;
-    --border-color: #404040;
+    --text-secondary: #e0e0e0;
+    --text-tertiary: #a0a0a0;
+    --border-color: #333333;
     --border-accent: #4a9eff;
     --button-bg: transparent;
     --button-text: #ffffff;
     --button-hover: #4a9eff;
-    --metric-border: #404040;
-    --analysis-bg: rgba(255, 255, 255, 0.03);
-    --chat-border: #404040;
-    --thinking-bg: rgba(255, 255, 255, 0.03);
-    --alert-bg: #2d2d2d;
+    --metric-border: #333333;
+    --analysis-bg: rgba(74, 158, 255, 0.08);
+    --chat-border: #2a2a2a;
+    --thinking-bg: rgba(74, 158, 255, 0.08);
+    --alert-bg: #1f1f1f;
 }
 
-/* Light mode colors - when explicitly set */
-.stApp[data-theme="light"],
-[data-baseweb-theme="light"] {
+/* Light mode colors */
+[data-theme="light"] {
     --bg-primary: #ffffff;
-    --bg-secondary: #f5f5f5;
+    --bg-secondary: #f8f9fa;
     --text-primary: #1a1a1a;
-    --text-secondary: #666666;
-    --text-tertiary: #888888;
+    --text-secondary: #2c2c2c;
+    --text-tertiary: #666666;
     --border-color: #e0e0e0;
-    --border-accent: #4a9eff;
+    --border-accent: #2563eb;
     --button-bg: transparent;
     --button-text: #1a1a1a;
-    --button-hover: #4a9eff;
-    --metric-border: #e0e0e0;
-    --analysis-bg: rgba(74, 158, 255, 0.05);
-    --chat-border: #e0e0e0;
-    --thinking-bg: rgba(74, 158, 255, 0.08);
-    --alert-bg: #f8f9fa;
+    --button-hover: #2563eb;
+    --metric-border: #e5e7eb;
+    --analysis-bg: rgba(37, 99, 235, 0.05);
+    --chat-border: #e5e7eb;
+    --thinking-bg: rgba(37, 99, 235, 0.05);
+    --alert-bg: #f1f5f9;
 }
 
 /* ============================================

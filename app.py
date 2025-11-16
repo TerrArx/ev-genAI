@@ -29,10 +29,42 @@ st.set_page_config(
 
 # --- LOAD EXTERNAL CSS ---
 def load_css():
-    """Load external CSS file."""
+    """Load external CSS file with theme detection."""
     css_file = os.path.join(os.path.dirname(__file__), 'style.css')
     with open(css_file) as f:
         st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+    
+    # Add theme detection script
+    st.markdown("""
+    <script>
+    (function() {
+        const updateTheme = () => {
+            const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const streamlitTheme = window.parent.document.querySelector('[data-testid="stAppViewContainer"]');
+            
+            if (streamlitTheme) {
+                const computedBg = window.getComputedStyle(streamlitTheme).backgroundColor;
+                const isDarkMode = computedBg.match(/rgb\\((\\d+),\\s*(\\d+),\\s*(\\d+)\\)/) || [];
+                const brightness = isDarkMode.length > 3 ? 
+                    (parseInt(isDarkMode[1]) * 299 + parseInt(isDarkMode[2]) * 587 + parseInt(isDarkMode[3]) * 114) / 1000 : 255;
+                
+                document.documentElement.setAttribute('data-theme', brightness < 128 ? 'dark' : 'light');
+            }
+        };
+        
+        updateTheme();
+        
+        // Watch for theme changes
+        if (window.matchMedia) {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateTheme);
+        }
+        
+        // Re-check on Streamlit reruns
+        const observer = new MutationObserver(updateTheme);
+        observer.observe(document.body, { attributes: true, childList: true, subtree: true });
+    })();
+    </script>
+    """, unsafe_allow_html=True)
 
 load_css()
 
