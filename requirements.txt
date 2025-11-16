@@ -3,8 +3,9 @@ numpy==1.26.4
 tensorflow==2.18.0
 keras==3.7.0
 scikit-learn==1.5.2
-google-generativeai==0.8.3
+google.generativeai==0.8.3
 plotly==5.24.1
 reportlab==4.2.5
 kaleido==0.2.1
 joblib==1.4.2
+
