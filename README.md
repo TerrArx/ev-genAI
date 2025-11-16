@@ -9,7 +9,7 @@
 
 **Design your perfect electric vehicle with AI-powered recommendations**
 
-[🚀 Live Demo](https://evospex.streamlit.app/) | [📊 Dataset](https://www.kaggle.com/datasets/pratyushpuri/ev-electrical-vehicles-dataset-3k-records-2025)
+[🚀](https://evospex.streamlit.app/) | [📊](https://www.kaggle.com/datasets/pratyushpuri/ev-electrical-vehicles-dataset-3k-records-2025)
 </div>
 
 ---
