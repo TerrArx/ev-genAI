@@ -1,7 +1,56 @@
-/* Main container styling - Dark theme */
+/* ============================================
+   CSS VARIABLES FOR THEME SUPPORT
+   ============================================ */
+
+:root {
+    /* Light mode colors */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f5f5f5;
+    --text-primary: #1a1a1a;
+    --text-secondary: #666666;
+    --text-tertiary: #888888;
+    --border-color: #e0e0e0;
+    --border-accent: #4a9eff;
+    --button-bg: transparent;
+    --button-text: #1a1a1a;
+    --button-hover: #4a9eff;
+    --metric-border: #e0e0e0;
+    --analysis-bg: rgba(74, 158, 255, 0.05);
+    --chat-border: #e0e0e0;
+    --thinking-bg: rgba(74, 158, 255, 0.08);
+    --alert-bg: #f8f9fa;
+}
+
+/* Dark mode colors */
+[data-theme="dark"], 
+.stApp[data-theme="dark"],
+[data-baseweb-theme="dark"] {
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #252525;
+    --text-primary: #ffffff;
+    --text-secondary: #cccccc;
+    --text-tertiary: #888888;
+    --border-color: #404040;
+    --border-accent: #4a9eff;
+    --button-bg: transparent;
+    --button-text: #ffffff;
+    --button-hover: #4a9eff;
+    --metric-border: #404040;
+    --analysis-bg: rgba(255, 255, 255, 0.03);
+    --chat-border: #404040;
+    --thinking-bg: rgba(255, 255, 255, 0.03);
+    --alert-bg: #2d2d2d;
+}
+
+/* ============================================
+   MAIN CONTAINER STYLING
+   ============================================ */
+
+/* Main container styling */
 .main {
-    background: #1a1a1a;
+    background: var(--bg-primary);
     font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--text-primary);
 }
 
 /* Remove card backgrounds - minimalist approach */
@@ -22,28 +71,28 @@
 div[data-testid="metric-container"] {
     background: transparent;
     border: none;
-    border-bottom: 1px solid #404040;
+    border-bottom: 1px solid var(--metric-border);
     padding: 20px 0;
     border-radius: 0;
-    color: white;
+    color: var(--text-primary);
 }
 
 div[data-testid="metric-container"] label {
-    color: #888888 !important;
+    color: var(--text-tertiary) !important;
     font-weight: 400;
     font-size: 15px !important;
     letter-spacing: 0.5px;
 }
 
 div[data-testid="metric-container"] [data-testid="stMetricValue"] {
-    color: #ffffff !important;
+    color: var(--text-primary) !important;
     font-size: 42px !important;
     font-weight: 300;
     letter-spacing: -1px;
 }
 
 div[data-testid="metric-container"] [data-testid="stMetricDelta"] {
-    color: #888888 !important;
+    color: var(--text-tertiary) !important;
     font-size: 14px !important;
     font-weight: 300;
 }
@@ -51,26 +100,27 @@ div[data-testid="metric-container"] [data-testid="stMetricDelta"] {
 /* Button styling - Minimalist */
 .stButton > button {
     width: 100%;
-    background: transparent;
-    color: white;
+    background: var(--button-bg);
+    color: var(--button-text);
     font-size: 16px;
     font-weight: 300;
     padding: 16px;
     border-radius: 0;
-    border: 1px solid #4a9eff;
+    border: 1px solid var(--border-accent);
     transition: all 0.3s ease;
     letter-spacing: 1px;
 }
 
 .stButton > button:hover {
-    background: #4a9eff;
-    border-color: #4a9eff;
+    background: var(--button-hover);
+    border-color: var(--button-hover);
+    color: #ffffff;
 }
 
 /* Title styling - Minimalist */
 .main-title {
     text-align: center;
-    color: #ffffff;
+    color: var(--text-primary);
     font-size: 56px;
     font-weight: 300;
     margin-bottom: 15px;
@@ -79,7 +129,7 @@ div[data-testid="metric-container"] [data-testid="stMetricDelta"] {
 
 .sub-title {
     text-align: center;
-    color: #888888;
+    color: var(--text-tertiary);
     font-size: 18px;
     font-weight: 300;
     margin-bottom: 40px;
@@ -88,24 +138,24 @@ div[data-testid="metric-container"] [data-testid="stMetricDelta"] {
 
 /* Analysis box - Minimalist */
 .analysis-box {
-    background: transparent;
+    background: var(--analysis-bg);
     padding: 20px 0;
     margin-top: 20px;
-    border-left: 2px solid #4a9eff;
+    border-left: 2px solid var(--border-accent);
     padding-left: 20px;
-    color: #cccccc;
+    color: var(--text-secondary);
     font-size: 16px;
     font-weight: 300;
     line-height: 1.7;
 }
 
-/* Sidebar styling - Dark theme */
+/* Sidebar styling */
 [data-testid="stSidebar"] {
-    background: #252525;
+    background: var(--bg-secondary);
 }
 
 [data-testid="stSidebar"] .stMarkdown {
-    color: white;
+    color: var(--text-primary);
 }
 
 /* Chat message styling - Minimalist */
@@ -114,10 +164,11 @@ div[data-testid="metric-container"] [data-testid="stMetricDelta"] {
     border-radius: 0;
     padding: 12px 0;
     margin: 8px 0;
-    border-bottom: 1px solid #2a2a2a;
+    border-bottom: 1px solid var(--chat-border);
     font-size: 15px;
     font-weight: 300;
     line-height: 1.6;
+    color: var(--text-primary);
 }
 
 /* Hide chat avatars */
@@ -129,33 +180,33 @@ div[data-testid="metric-container"] [data-testid="stMetricDelta"] {
     display: none !important;
 }
 
-/* Override Streamlit's default white backgrounds */
+/* Override Streamlit's default backgrounds */
 .stSelectbox, .stCheckbox {
-    color: white;
+    color: var(--text-primary);
 }
 
 /* Info box styling */
 .stAlert {
-    background: #2d2d2d;
-    border: 1px solid #4a9eff;
+    background: var(--alert-bg);
+    border: 1px solid var(--border-accent);
 }
 
 /* Chat container styling - Minimalist */
 .chat-container {
     background: transparent;
     padding: 0;
-    border-left: 1px solid #404040;
+    border-left: 1px solid var(--border-color);
     padding-left: 20px;
     min-height: 100%;
 }
 
 .chat-header {
-    color: #ffffff;
+    color: var(--text-primary);
     font-size: 22px;
     font-weight: 300;
     margin-bottom: 15px;
     padding-bottom: 15px;
-    border-bottom: 1px solid #404040;
+    border-bottom: 1px solid var(--border-color);
     letter-spacing: 0.3px;
 }
 
@@ -164,11 +215,11 @@ div[data-testid="metric-container"] [data-testid="stMetricDelta"] {
     background: transparent;
     padding: 12px 0;
     margin: 10px 0;
-    border-bottom: 1px solid #2a2a2a;
+    border-bottom: 1px solid var(--chat-border);
 }
 
 .user-input-label {
-    color: #888888;
+    color: var(--text-tertiary);
     font-size: 13px;
     font-weight: 300;
     text-transform: uppercase;
@@ -176,7 +227,7 @@ div[data-testid="metric-container"] [data-testid="stMetricDelta"] {
 }
 
 .user-input-value {
-    color: #ffffff;
+    color: var(--text-primary);
     font-size: 17px;
     font-weight: 300;
     margin-top: 6px;
@@ -184,18 +235,18 @@ div[data-testid="metric-container"] [data-testid="stMetricDelta"] {
 
 /* Section headers - Minimalist */
 .section-header {
-    color: #ffffff;
+    color: var(--text-primary);
     font-size: 24px;
     font-weight: 300;
     margin-bottom: 20px;
     padding-bottom: 12px;
-    border-bottom: 1px solid #404040;
+    border-bottom: 1px solid var(--border-color);
     letter-spacing: 0.5px;
 }
 
 /* Thinking indicator - Minimalist */
 .thinking-indicator {
-    color: #888888;
+    color: var(--text-tertiary);
     font-style: normal;
     padding: 15px 20px;
     text-align: left;
@@ -204,7 +255,7 @@ div[data-testid="metric-container"] [data-testid="stMetricDelta"] {
     display: flex;
     align-items: center;
     gap: 8px;
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--thinking-bg);
     border-radius: 8px;
     margin: 10px 0;
     border-left: 3px solid #3b82f6;
@@ -252,7 +303,7 @@ div[data-testid="metric-container"] [data-testid="stMetricDelta"] {
 .stSelectbox label, .stCheckbox label {
     font-size: 15px !important;
     font-weight: 300 !important;
-    color: #888888 !important;
+    color: var(--text-tertiary) !important;
     letter-spacing: 0.5px;
 }
 
@@ -260,9 +311,9 @@ div[data-testid="metric-container"] [data-testid="stMetricDelta"] {
 .stAlert {
     background: transparent !important;
     border: none !important;
-    border-left: 2px solid #4a9eff !important;
+    border-left: 2px solid var(--border-accent) !important;
     padding-left: 15px !important;
-    color: #cccccc !important;
+    color: var(--text-secondary) !important;
     font-size: 15px !important;
     font-weight: 300 !important;
 }
