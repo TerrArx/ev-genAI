@@ -118,7 +118,7 @@ div[data-testid="metric-container"] [data-testid="stMetricDelta"] {
 /* Title styling - Minimalist */
 .main-title {
     text-align: center;
-    color: var(--text-primary);
+    color: var(--text-primary) !important;
     font-size: 56px;
     font-weight: 300;
     margin-bottom: 15px;
@@ -127,11 +127,28 @@ div[data-testid="metric-container"] [data-testid="stMetricDelta"] {
 
 .sub-title {
     text-align: center;
-    color: var(--text-tertiary);
+    color: var(--text-tertiary) !important;
     font-size: 18px;
     font-weight: 300;
     margin-bottom: 40px;
     letter-spacing: 0.3px;
+}
+
+/* Light mode heading overrides */
+[data-theme="light"] .main-title {
+    color: #1a1a1a !important;
+}
+
+[data-theme="light"] .sub-title {
+    color: #666666 !important;
+}
+
+[data-theme="light"] .section-header {
+    color: #1a1a1a !important;
+}
+
+[data-theme="light"] .chat-header {
+    color: #1a1a1a !important;
 }
 
 /* Analysis box - Minimalist */
@@ -199,7 +216,7 @@ div[data-testid="metric-container"] [data-testid="stMetricDelta"] {
 }
 
 .chat-header {
-    color: var(--text-primary);
+    color: var(--text-primary) !important;
     font-size: 22px;
     font-weight: 300;
     margin-bottom: 15px;
@@ -233,7 +250,7 @@ div[data-testid="metric-container"] [data-testid="stMetricDelta"] {
 
 /* Section headers - Minimalist */
 .section-header {
-    color: var(--text-primary);
+    color: var(--text-primary) !important;
     font-size: 24px;
     font-weight: 300;
     margin-bottom: 20px;
