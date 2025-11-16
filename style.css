@@ -1,0 +1,268 @@
+/* Main container styling - Dark theme */
+.main {
+    background: #1a1a1a;
+    font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Remove card backgrounds - minimalist approach */
+.spec-card {
+    background: transparent;
+    padding: 20px 0;
+    margin: 20px 0;
+}
+
+/* Input section styling */
+.input-section {
+    background: transparent;
+    padding: 20px 0;
+    margin-bottom: 20px;
+}
+
+/* Metric cards - Minimalist */
+div[data-testid="metric-container"] {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #404040;
+    padding: 20px 0;
+    border-radius: 0;
+    color: white;
+}
+
+div[data-testid="metric-container"] label {
+    color: #888888 !important;
+    font-weight: 400;
+    font-size: 15px !important;
+    letter-spacing: 0.5px;
+}
+
+div[data-testid="metric-container"] [data-testid="stMetricValue"] {
+    color: #ffffff !important;
+    font-size: 42px !important;
+    font-weight: 300;
+    letter-spacing: -1px;
+}
+
+div[data-testid="metric-container"] [data-testid="stMetricDelta"] {
+    color: #888888 !important;
+    font-size: 14px !important;
+    font-weight: 300;
+}
+
+/* Button styling - Minimalist */
+.stButton > button {
+    width: 100%;
+    background: transparent;
+    color: white;
+    font-size: 16px;
+    font-weight: 300;
+    padding: 16px;
+    border-radius: 0;
+    border: 1px solid #4a9eff;
+    transition: all 0.3s ease;
+    letter-spacing: 1px;
+}
+
+.stButton > button:hover {
+    background: #4a9eff;
+    border-color: #4a9eff;
+}
+
+/* Title styling - Minimalist */
+.main-title {
+    text-align: center;
+    color: #ffffff;
+    font-size: 56px;
+    font-weight: 300;
+    margin-bottom: 15px;
+    letter-spacing: -1px;
+}
+
+.sub-title {
+    text-align: center;
+    color: #888888;
+    font-size: 18px;
+    font-weight: 300;
+    margin-bottom: 40px;
+    letter-spacing: 0.3px;
+}
+
+/* Analysis box - Minimalist */
+.analysis-box {
+    background: transparent;
+    padding: 20px 0;
+    margin-top: 20px;
+    border-left: 2px solid #4a9eff;
+    padding-left: 20px;
+    color: #cccccc;
+    font-size: 16px;
+    font-weight: 300;
+    line-height: 1.7;
+}
+
+/* Sidebar styling - Dark theme */
+[data-testid="stSidebar"] {
+    background: #252525;
+}
+
+[data-testid="stSidebar"] .stMarkdown {
+    color: white;
+}
+
+/* Chat message styling - Minimalist */
+.stChatMessage {
+    background: transparent;
+    border-radius: 0;
+    padding: 12px 0;
+    margin: 8px 0;
+    border-bottom: 1px solid #2a2a2a;
+    font-size: 15px;
+    font-weight: 300;
+    line-height: 1.6;
+}
+
+/* Hide chat avatars */
+.stChatMessage img {
+    display: none !important;
+}
+
+.stChatMessage [data-testid="chatAvatarIcon"] {
+    display: none !important;
+}
+
+/* Override Streamlit's default white backgrounds */
+.stSelectbox, .stCheckbox {
+    color: white;
+}
+
+/* Info box styling */
+.stAlert {
+    background: #2d2d2d;
+    border: 1px solid #4a9eff;
+}
+
+/* Chat container styling - Minimalist */
+.chat-container {
+    background: transparent;
+    padding: 0;
+    border-left: 1px solid #404040;
+    padding-left: 20px;
+    min-height: 100%;
+}
+
+.chat-header {
+    color: #ffffff;
+    font-size: 22px;
+    font-weight: 300;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #404040;
+    letter-spacing: 0.3px;
+}
+
+/* User inputs display - Minimalist */
+.user-input-item {
+    background: transparent;
+    padding: 12px 0;
+    margin: 10px 0;
+    border-bottom: 1px solid #2a2a2a;
+}
+
+.user-input-label {
+    color: #888888;
+    font-size: 13px;
+    font-weight: 300;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.user-input-value {
+    color: #ffffff;
+    font-size: 17px;
+    font-weight: 300;
+    margin-top: 6px;
+}
+
+/* Section headers - Minimalist */
+.section-header {
+    color: #ffffff;
+    font-size: 24px;
+    font-weight: 300;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #404040;
+    letter-spacing: 0.5px;
+}
+
+/* Thinking indicator - Minimalist */
+.thinking-indicator {
+    color: #888888;
+    font-style: normal;
+    padding: 15px 20px;
+    text-align: left;
+    font-size: 15px;
+    font-weight: 300;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    margin: 10px 0;
+    border-left: 3px solid #3b82f6;
+}
+
+.thinking-dots {
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.thinking-dots span {
+    width: 8px;
+    height: 8px;
+    background: #4a9eff;
+    border-radius: 50%;
+    display: inline-block;
+    animation: wave 1.4s infinite ease-in-out;
+}
+
+.thinking-dots span:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.thinking-dots span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.thinking-dots span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes wave {
+    0%, 60%, 100% {
+        transform: translateY(0);
+        opacity: 0.4;
+    }
+    30% {
+        transform: translateY(-10px);
+        opacity: 1;
+    }
+}
+
+/* Override Streamlit select box styling */
+.stSelectbox label, .stCheckbox label {
+    font-size: 15px !important;
+    font-weight: 300 !important;
+    color: #888888 !important;
+    letter-spacing: 0.5px;
+}
+
+/* Info/Alert styling - Minimalist */
+.stAlert {
+    background: transparent !important;
+    border: none !important;
+    border-left: 2px solid #4a9eff !important;
+    padding-left: 15px !important;
+    color: #cccccc !important;
+    font-size: 15px !important;
+    font-weight: 300 !important;
+}
