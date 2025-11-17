@@ -156,7 +156,7 @@ def get_gemini_highlights(specs_dict, inputs_dict):
     Region: {inputs_dict['C_Region']} | Chemistry: {inputs_dict['C_Battery_Chem']} | Connector: {inputs_dict['C_Connector']}
     Speed: {inputs_dict['C_Charge_Speed']} | Budget: {inputs_dict['C_Budget']} | V2X: {"Yes" if inputs_dict['C_Has_V2X'] else "No"}
     
-    Focus on market competitiveness, value, and tech benefits. Be brief and enthusiastic.
+        Focus on market competitiveness, value, and tech benefits. Be brief and professional/formal.
     """
     
     try:
@@ -891,4 +891,5 @@ if st.session_state.generated_specs is not None:
     
     st.plotly_chart(fig5, width='stretch')
     
+
     st.markdown("</div>", unsafe_allow_html=True)
