@@ -123,7 +123,7 @@ except Exception as e:
 # --- CONFIGURE GEMINI API ---
 try:
     genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-    gemini_model = genai.GenerativeModel('gemini-2.5-flash')
+    gemini_model = genai.GenerativeModel('gemini-2.0-flash-lite')
 except Exception as e:
     st.warning(f"Could not configure Gemini API. Analysis will be disabled. Error: {e}")
     gemini_model = None
@@ -890,4 +890,5 @@ if st.session_state.generated_specs is not None:
     
     st.plotly_chart(fig5, width='stretch')
     
+
     st.markdown("</div>", unsafe_allow_html=True)
