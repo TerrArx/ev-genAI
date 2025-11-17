@@ -11,13 +11,20 @@ import joblib
 import sklearn
 import json
 import plotly.graph_objects as go
+import plotly.io as pio
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image, PageBreak
 from reportlab.lib import colors
+from reportlab.lib.utils import ImageReader
+from reportlab.platypus import Image as RLImage
 from io import BytesIO
 import base64
+import matplotlib.pyplot as plt
+import logging
+
+logging.getLogger().setLevel(logging.INFO)
 
 # --- PAGE CONFIG (MUST BE FIRST) ---
 st.set_page_config(
@@ -514,19 +521,100 @@ if st.session_state.generated_specs is not None:
         elements.append(Paragraph("PERFORMANCE VISUALIZATIONS", heading_style))
         elements.append(Spacer(1, 0.2*inch))
         
-        # Helper function to convert plotly figure to image using write_image
-        def fig_to_image(fig, width=5*inch, height=3*inch):
+        # --- UNIVERSAL PLOTLY → PNG → REPORTLAB IMAGE (WITH FALLBACK) ---
+        def fig_to_image(fig, width=5*inch, height=3*inch,
+                         px_width=1000, px_height=600, scale=2):
+            """
+            Convert a Plotly figure into a ReportLab Image.
+            
+            1. Try plotly → kaleido → PNG
+            2. If kaleido fails, fallback to simple Matplotlib redraw
+            """
+            
+            # --- Attempt 1: Plotly + Kaleido ---
             try:
-                # Use pio.write_image which works better in cloud environments
-                import plotly.io as pio
-                img_buffer = BytesIO()
-                pio.write_image(fig, img_buffer, format='png', width=800, height=500, scale=2)
-                img_buffer.seek(0)
-                img = Image(img_buffer, width=width, height=height)
-                return img
+                logging.info("Trying plotly.to_image with kaleido...")
+                
+                img_bytes = pio.to_image(
+                    fig,
+                    format="png",
+                    engine="kaleido",
+                    width=px_width,
+                    height=px_height,
+                    scale=scale
+                )
+                
+                buf = BytesIO(img_bytes)
+                buf.seek(0)
+                
+                return RLImage(
+                    ImageReader(buf),
+                    width=width,
+                    height=height
+                )
+            
             except Exception as e:
-                # If that fails, return None to use table fallback
-                return None
+                logging.exception("Kaleido export failed: %s", e)
+            
+            # --- Attempt 2: Matplotlib fallback ---
+            try:
+                logging.info("Falling back to basic Matplotlib rendering...")
+                
+                # Create MPL canvas with same PDF size
+                fig_mpl, ax = plt.subplots(
+                    figsize=(width/72, height/72),
+                    dpi=72
+                )
+
+                traces = getattr(fig, "data", [])
+                
+                for tr in traces:
+                    x = np.array(getattr(tr, "x", [])) if getattr(tr, "x", None) is not None else None
+                    y = np.array(getattr(tr, "y", [])) if getattr(tr, "y", None) is not None else None
+                    
+                    if x is None or y is None:
+                        continue
+                    
+                    mode = getattr(tr, "mode", "")
+                    
+                    # Scatter
+                    if "markers" in mode or "lines" in mode:
+                        ax.plot(x, y, marker="o")
+                    
+                    # Bar
+                    elif getattr(tr, "type", "") == "bar":
+                        ax.bar(x, y)
+
+                # Titles / axis labels if present
+                try:
+                    layout = fig.layout
+                    if hasattr(layout, "title") and layout.title.text:
+                        ax.set_title(layout.title.text)
+                    if hasattr(layout, "xaxis") and layout.xaxis.title.text:
+                        ax.set_xlabel(layout.xaxis.title.text)
+                    if hasattr(layout, "yaxis") and layout.yaxis.title.text:
+                        ax.set_ylabel(layout.yaxis.title.text)
+                except:
+                    pass
+                
+                ax.grid(True, alpha=0.4)
+                
+                # Render to PNG buffer
+                out = BytesIO()
+                fig_mpl.tight_layout()
+                fig_mpl.savefig(out, format="png", dpi=150)
+                plt.close(fig_mpl)
+                out.seek(0)
+                
+                return RLImage(
+                    ImageReader(out),
+                    width=width,
+                    height=height
+                )
+            
+            except Exception as e:
+                logging.exception("Matplotlib fallback also failed: %s", e)
+                return None  # Return None to trigger table fallback
         
         try:
             # Create the same charts as in the web app

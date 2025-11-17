@@ -1,12 +1,11 @@
 streamlit
-numpy<2.0.0
+numpy
 tensorflow
 keras
 scikit-learn
-google.generativeai
+google-generativeai
+plotly
 reportlab
-plotly>=5.15.0
-kaleido>=0.2.1
+kaleido
 joblib
-
-
+matplotlib
