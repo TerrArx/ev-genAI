@@ -22,6 +22,7 @@ from io import BytesIO
 import base64
 import matplotlib.pyplot as plt
 import logging
+import datetime
 
 logging.getLogger().setLevel(logging.INFO)
 
@@ -149,25 +150,13 @@ def get_gemini_highlights(specs_dict, inputs_dict):
     if not gemini_model:
         return "⚡ Analysis service is not configured. Please check your API key."
 
-    prompt = f"""
-    You are an enthusiastic EV technology expert. A generative model has created an EV specification with these features:
+    # Optimized, concise prompt to reduce token usage
+    prompt = f"""As an EV expert, highlight 3-4 strengths of this generated EV:
+    Range: {specs_dict['Range_km']:.0f}km | Price: ${specs_dict['Price_USD']:,.0f} | Battery: {specs_dict['Battery_Capacity_kWh']:.0f}kWh
+    Region: {inputs_dict['C_Region']} | Chemistry: {inputs_dict['C_Battery_Chem']} | Connector: {inputs_dict['C_Connector']}
+    Speed: {inputs_dict['C_Charge_Speed']} | Budget: {inputs_dict['C_Budget']} | V2X: {"Yes" if inputs_dict['C_Has_V2X'] else "No"}
     
-    **Generated Specifications:**
-    - Range: {specs_dict['Range_km']:.0f} km
-    - Price: ${specs_dict['Price_USD']:,.0f} USD
-    - Battery Capacity: {specs_dict['Battery_Capacity_kWh']:.0f} kWh
-    
-    **User Preferences:**
-    - Region: {inputs_dict['C_Region']}
-    - Battery Chemistry: {inputs_dict['C_Battery_Chem']}
-    - Charging Connector: {inputs_dict['C_Connector']}
-    - Charging Speed: {inputs_dict['C_Charge_Speed']}
-    - Budget Class: {inputs_dict['C_Budget']}
-    - V2X Enabled: {"Yes" if inputs_dict['C_Has_V2X'] else "No"}
-    
-    Provide 3-4 brief, enthusiastic bullet points highlighting ONLY the positive aspects, strengths, 
-    and advantages of this specification. Focus on market competitiveness, value proposition, 
-    technology benefits, and user advantages. Be concise and exciting!
+    Focus on market competitiveness, value, and tech benefits. Be brief and enthusiastic.
     """
     
     try:
@@ -181,23 +170,15 @@ def chatbot_response(user_message, specs_dict, inputs_dict):
     if not gemini_model:
         return "Analysis service is not configured. Please check your API key."
     
-    prompt = f"""
-    You are an expert EV consultant helping a user understand their generated EV specification.
+    # Optimized, concise prompt
+    prompt = f"""You're an EV consultant. Answer this question about the generated EV:
     
-    **Generated EV Specs:**
-    - Range: {specs_dict.get('Range_km', 'N/A'):.0f} km
-    - Price: ${specs_dict.get('Price_USD', 'N/A'):,.0f} USD
-    - Battery: {specs_dict.get('Battery_Capacity_kWh', 'N/A'):.0f} kWh
-    - Region: {inputs_dict.get('C_Region', 'N/A')}
-    - Battery Chemistry: {inputs_dict.get('C_Battery_Chem', 'N/A')}
-    - Connector: {inputs_dict.get('C_Connector', 'N/A')}
-    - Charging Speed: {inputs_dict.get('C_Charge_Speed', 'N/A')}
-    - V2X: {"Yes" if inputs_dict.get('C_Has_V2X') else "No"}
+    Specs: {specs_dict.get('Range_km', 'N/A'):.0f}km range, ${specs_dict.get('Price_USD', 'N/A'):,.0f}, {specs_dict.get('Battery_Capacity_kWh', 'N/A'):.0f}kWh
+    Config: {inputs_dict.get('C_Region', 'N/A')}, {inputs_dict.get('C_Battery_Chem', 'N/A')}, {inputs_dict.get('C_Connector', 'N/A')}, {inputs_dict.get('C_Charge_Speed', 'N/A')}, V2X: {"Yes" if inputs_dict.get('C_Has_V2X') else "No"}
     
-    User Question: {user_message}
+    Question: {user_message}
     
-    Provide a helpful, concise response addressing their concerns or questions about this EV specification.
-    Focus on being informative and addressing future concerns, market viability, or technical questions.
+    Provide a helpful, concise response,addressing their concerns or questions aboout this EV specs.
     """
     
     try:
@@ -215,6 +196,8 @@ if 'chat_history' not in st.session_state:
     st.session_state.chat_history = []
 if 'is_thinking' not in st.session_state:
     st.session_state.is_thinking = False
+if 'market_analysis' not in st.session_state:
+    st.session_state.market_analysis = None
 
 # --- MAIN APP ---
 st.markdown("<h1 class='main-title'>⚡ Electric Vehicle Specification Generator</h1>", unsafe_allow_html=True)
@@ -261,6 +244,7 @@ with input_col:
             generated_specs = generate_cvae_specs(inputs, cat_features_list, num_features_list)
             st.session_state.generated_specs = generated_specs
             st.session_state.user_inputs = inputs
+            st.session_state.market_analysis = None  # Reset analysis for new specs
 
 # --- RIGHT COLUMN: CHATBOT (BESIDE INPUTS) ---
 with chat_col:
@@ -354,14 +338,17 @@ if st.session_state.generated_specs is not None:
     st.markdown("<div class='spec-card'>", unsafe_allow_html=True)
     st.markdown("<div class='section-header'>✨ Market Highlights</div>", unsafe_allow_html=True)
     
-    with st.spinner("🔍 Analyzing market advantages..."):
-        analysis = get_gemini_highlights(specs, inputs)
-        st.markdown(f"<div class='analysis-box'>{analysis}</div>", unsafe_allow_html=True)
+    # Generate market analysis only once and cache it
+    if st.session_state.market_analysis is None:
+        with st.spinner("🔍 Analyzing market advantages..."):
+            st.session_state.market_analysis = get_gemini_highlights(specs, inputs)
+    
+    analysis = st.session_state.market_analysis
+    st.markdown(f"<div class='analysis-box'>{analysis}</div>", unsafe_allow_html=True)
     
     st.markdown("</div>", unsafe_allow_html=True)
     
     # --- DOWNLOAD REPORT BUTTON ---
-    import datetime
     if 'generation_time' not in st.session_state:
         st.session_state.generation_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
