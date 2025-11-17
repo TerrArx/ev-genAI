@@ -514,12 +514,19 @@ if st.session_state.generated_specs is not None:
         elements.append(Paragraph("PERFORMANCE VISUALIZATIONS", heading_style))
         elements.append(Spacer(1, 0.2*inch))
         
-        # Helper function to convert plotly figure to image
+        # Helper function to convert plotly figure to image using write_image
         def fig_to_image(fig, width=5*inch, height=3*inch):
-            img_bytes = fig.to_image(format="png", width=800, height=500)
-            img_buffer = BytesIO(img_bytes)
-            img = Image(img_buffer, width=width, height=height)
-            return img
+            try:
+                # Use pio.write_image which works better in cloud environments
+                import plotly.io as pio
+                img_buffer = BytesIO()
+                pio.write_image(fig, img_buffer, format='png', width=800, height=500, scale=2)
+                img_buffer.seek(0)
+                img = Image(img_buffer, width=width, height=height)
+                return img
+            except Exception as e:
+                # If that fails, return None to use table fallback
+                return None
         
         try:
             # Create the same charts as in the web app
@@ -574,9 +581,69 @@ if st.session_state.generated_specs is not None:
                 yaxis={'title': 'Value'}
             )
             
+            elements.append(Paragraph("Price vs Range Comparison", normal_style))
+            elements.append(Spacer(1, 0.1*inch))
+            chart1_img = fig_to_image(fig1)
+            if chart1_img:
+                elements.append(chart1_img)
+            else:
+                # Provide data table instead
+                chart_data = [
+                    ['Vehicle', 'Price (USD)', 'Range (km)'],
+                    ['Your EV', f"${specs['Price_USD']:,.0f}", f"{specs['Range_km']:.0f}"]
+                ]
+                chart_table = Table(chart_data, colWidths=[2*inch, 2*inch, 2*inch])
+                chart_table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#e0f2fe')),
+                    ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#1e293b')),
+                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#cbd5e1'))
+                ]))
+                elements.append(chart_table)
+            elements.append(Spacer(1, 0.3*inch))
+            
+            # Chart 2: Specs Breakdown
+            fig3 = go.Figure()
+            categories = ['Range (km)', 'Battery (kWh)', 'Price (K USD)']
+            values = [specs['Range_km'], specs['Battery_Capacity_kWh'], specs['Price_USD']/1000]
+            fig3.add_trace(go.Bar(
+                x=categories,
+                y=values,
+                marker=dict(color=['#4a9eff', '#60d394', '#ffa07a']),
+                text=[f"{v:.0f}" for v in values],
+                textposition='outside'
+            ))
+            fig3.update_layout(
+                title='Specification Overview',
+                template='plotly_white',
+                showlegend=False,
+                height=400,
+                yaxis={'title': 'Value'}
+            )
+            
             elements.append(Paragraph("Specification Overview", normal_style))
             elements.append(Spacer(1, 0.1*inch))
-            elements.append(fig_to_image(fig3))
+            chart2_img = fig_to_image(fig3)
+            if chart2_img:
+                elements.append(chart2_img)
+            else:
+                # Provide data table instead
+                spec_data = [
+                    ['Specification', 'Value'],
+                    ['Range', f"{specs['Range_km']:.0f} km"],
+                    ['Battery', f"{specs['Battery_Capacity_kWh']:.0f} kWh"],
+                    ['Price', f"${specs['Price_USD']/1000:.1f}K USD"]
+                ]
+                spec_table = Table(spec_data, colWidths=[3*inch, 3*inch])
+                spec_table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#ccfbf1')),
+                    ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#1e293b')),
+                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#cbd5e1'))
+                ]))
+                elements.append(spec_table)
             elements.append(Spacer(1, 0.3*inch))
             
             # Chart 3: Cost per Kilometer
@@ -601,10 +668,28 @@ if st.session_state.generated_specs is not None:
             
             elements.append(Paragraph("Cost per Kilometer Analysis", normal_style))
             elements.append(Spacer(1, 0.1*inch))
-            elements.append(fig_to_image(fig4))
+            chart3_img = fig_to_image(fig4)
+            if chart3_img:
+                elements.append(chart3_img)
+            else:
+                # Provide data table instead
+                cost_data = [
+                    ['Category', 'Cost/km (USD)'],
+                    ['Your EV', f"${cost_per_km:.2f}"],
+                    [f"{inputs['C_Budget']} Average", f"${budget_cost_map.get(inputs['C_Budget'], 180):.2f}"]
+                ]
+                cost_table = Table(cost_data, colWidths=[3*inch, 3*inch])
+                cost_table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#fef3c7')),
+                    ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#1e293b')),
+                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#cbd5e1'))
+                ]))
+                elements.append(cost_table)
             
         except Exception as e:
-            elements.append(Paragraph(f"Note: Visualization generation encountered an issue: {str(e)}", normal_style))
+            elements.append(Paragraph(f"Note: Chart generation unavailable in deployment environment. Data is provided in tables above.", normal_style))
         
         # Add project information footer
         elements.append(PageBreak())
