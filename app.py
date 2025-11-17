@@ -178,7 +178,8 @@ def chatbot_response(user_message, specs_dict, inputs_dict):
     
     Question: {user_message}
     
-    Provide a helpful, concise response,addressing their concerns or questions aboout this EV specs.
+    Provide a helpful, concise response,addressing their concerns or questions about this EV specs.
+    Emulate the energy of the chat and keep it engaging.But always stay professional and under 2-3 lines.
     """
     
     try:
@@ -890,5 +891,4 @@ if st.session_state.generated_specs is not None:
     
     st.plotly_chart(fig5, width='stretch')
     
-
     st.markdown("</div>", unsafe_allow_html=True)
