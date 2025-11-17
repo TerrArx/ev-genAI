@@ -17,7 +17,6 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image, PageBreak
 from reportlab.lib import colors
-from reportlab.lib.utils import ImageReader
 from reportlab.platypus import Image as RLImage
 from io import BytesIO
 import base64
@@ -366,6 +365,100 @@ if st.session_state.generated_specs is not None:
     if 'generation_time' not in st.session_state:
         st.session_state.generation_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
+    # --- DEDICATED MATPLOTLIB CHART RENDERERS FOR PDF ---
+    def render_price_vs_range_matplotlib(specs, inputs, width=6.5*inch, height=4*inch):
+        """Renders Price vs Range chart using pure Matplotlib."""
+        fig_mpl, ax = plt.subplots(figsize=(width/inch, height/inch), dpi=72)
+        
+        # Your EV
+        ax.scatter([specs['Price_USD']], [specs['Range_km']], 
+                   s=300, color='#4a9eff', marker='*', label='Your EV', zorder=3)
+        
+        # Market reference points
+        ref_prices = [30000, 45000, 60000, 75000, 90000]
+        ref_ranges = [250, 350, 450, 550, 600]
+        ax.scatter(ref_prices, ref_ranges, s=50, color='#666666', 
+                   alpha=0.5, label='Market Average', zorder=2)
+        
+        ax.set_title('Price vs Range Comparison', fontsize=12, fontweight='bold')
+        ax.set_xlabel('Price (USD)', fontsize=10)
+        ax.set_ylabel('Range (km)', fontsize=10)
+        ax.legend()
+        ax.grid(True, alpha=0.3)
+        
+        out = BytesIO()
+        plt.subplots_adjust(left=0.15, right=0.95, top=0.92, bottom=0.12)
+        fig_mpl.savefig(out, format="png", dpi=150)
+        plt.close(fig_mpl)
+        out.seek(0)
+        
+        # Use 6 inches width to fit page frame (456 points available)
+        return RLImage(out, width=6*inch, height=3.5*inch)
+    
+    def render_spec_overview_matplotlib(specs, width=6.5*inch, height=5*inch):
+        """Renders Specification Overview bar chart using pure Matplotlib."""
+        fig_mpl, ax = plt.subplots(figsize=(width/inch, height/inch), dpi=72)
+        
+        categories = ['Range\n(km)', 'Battery\n(kWh)', 'Price\n(K USD)']
+        values = [specs['Range_km'], specs['Battery_Capacity_kWh'], specs['Price_USD']/1000]
+        colors_list = ['#4a9eff', '#60d394', '#ffa07a']
+        
+        bars = ax.bar(categories, values, color=colors_list, edgecolor='#404040', linewidth=2, width=0.6)
+        
+        # Add value labels on top
+        for bar, val in zip(bars, values):
+            height = bar.get_height()
+            ax.text(bar.get_x() + bar.get_width()/2., height,
+                    f'{val:.0f}', ha='center', va='bottom', fontsize=11, fontweight='bold')
+        
+        ax.set_title('Specification Overview', fontsize=14, fontweight='bold', pad=15)
+        ax.set_ylabel('Value', fontsize=11)
+        ax.tick_params(axis='both', which='major', labelsize=10)
+        ax.grid(True, alpha=0.3, axis='y')
+        
+        out = BytesIO()
+        plt.subplots_adjust(left=0.15, right=0.95, top=0.92, bottom=0.12)
+        fig_mpl.savefig(out, format="png", dpi=150)
+        plt.close(fig_mpl)
+        out.seek(0)
+        
+        # Use 6 inches width, 4 inches height to fit page frame
+        return RLImage(out, width=6*inch, height=4*inch)
+    
+    def render_cost_per_km_matplotlib(specs, inputs, width=6.5*inch, height=5*inch):
+        """Renders Cost per Kilometer analysis using pure Matplotlib."""
+        fig_mpl, ax = plt.subplots(figsize=(width/inch, height/inch), dpi=72)
+        
+        cost_per_km = specs['Price_USD'] / specs['Range_km']
+        budget_cost_map = {'Budget': 120, 'Mid-Range': 180, 'Luxury': 250}
+        
+        categories = ['Your EV', f"{inputs['C_Budget']}\nAverage"]
+        values = [cost_per_km, budget_cost_map.get(inputs['C_Budget'], 180)]
+        colors_list = ['#4a9eff', '#666666']
+        
+        bars = ax.bar(categories, values, color=colors_list, edgecolor='#404040', linewidth=2, width=0.5)
+        
+        # Add value labels
+        for bar, val in zip(bars, values):
+            height = bar.get_height()
+            ax.text(bar.get_x() + bar.get_width()/2., height,
+                    f'${val:.2f}', ha='center', va='bottom', fontsize=11, fontweight='bold')
+        
+        ax.set_title('Cost per Kilometer Analysis', fontsize=14, fontweight='bold', pad=15)
+        ax.set_ylabel('USD per km', fontsize=11)
+        ax.set_ylim(0, max(values) * 1.3)
+        ax.tick_params(axis='both', which='major', labelsize=10)
+        ax.grid(True, alpha=0.3, axis='y')
+        
+        out = BytesIO()
+        plt.subplots_adjust(left=0.15, right=0.95, top=0.92, bottom=0.12)
+        fig_mpl.savefig(out, format="png", dpi=150)
+        plt.close(fig_mpl)
+        out.seek(0)
+        
+        # Use 6 inches width, 4 inches height to fit page frame
+        return RLImage(out, width=6*inch, height=4*inch)
+    
     # Generate PDF report
     def create_pdf_report():
         buffer = BytesIO()
@@ -389,7 +482,7 @@ if st.session_state.generated_specs is not None:
             parent=styles['Normal'],
             fontSize=11,
             textColor=colors.HexColor('#64748b'),  # Gray
-            spaceAfter=30,
+            spaceAfter=15,
             alignment=1  # Center
         )
         heading_style = ParagraphStyle(
@@ -436,7 +529,7 @@ if st.session_state.generated_specs is not None:
         or any commercial purposes. This report is generated using a machine learning model trained on hypothetical data.
         """
         elements.append(Paragraph(disclaimer_text, disclaimer_style))
-        elements.append(Spacer(1, 0.3*inch))
+        elements.append(Spacer(1, 0.15*inch))
         
         # Design Preferences Section
         elements.append(Paragraph("DESIGN PREFERENCES", heading_style))
@@ -460,7 +553,7 @@ if st.session_state.generated_specs is not None:
             ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#cbd5e1'))
         ]))
         elements.append(prefs_table)
-        elements.append(Spacer(1, 0.3*inch))
+        elements.append(Spacer(1, 0.2*inch))
         
         # Generated Specifications Section
         elements.append(Paragraph("GENERATED SPECIFICATIONS", heading_style))
@@ -481,7 +574,7 @@ if st.session_state.generated_specs is not None:
             ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#cbd5e1'))
         ]))
         elements.append(specs_table)
-        elements.append(Spacer(1, 0.3*inch))
+        elements.append(Spacer(1, 0.2*inch))
         
         # Performance Metrics Section
         elements.append(Paragraph("PERFORMANCE METRICS", heading_style))
@@ -502,7 +595,7 @@ if st.session_state.generated_specs is not None:
             ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#cbd5e1'))
         ]))
         elements.append(metrics_table)
-        elements.append(Spacer(1, 0.3*inch))
+        elements.append(Spacer(1, 0.2*inch))
         
         # Market Analysis Section
         elements.append(Paragraph("MARKET ANALYSIS", heading_style))
@@ -512,276 +605,37 @@ if st.session_state.generated_specs is not None:
         for para in analysis_paras:
             if para.strip():
                 elements.append(Paragraph(para.strip(), normal_style))
-                elements.append(Spacer(1, 0.1*inch))
+                elements.append(Spacer(1, 0.05*inch))
         
-        # Add page break before visualizations
-        elements.append(PageBreak())
-        
-        # Visualizations Section
+        # Performance visualizations right after market analysis (no page break)
         elements.append(Paragraph("PERFORMANCE VISUALIZATIONS", heading_style))
+        elements.append(Spacer(1, 0.15*inch))
+
+        # Price vs Range (use matplotlib renderer)
+        elements.append(Paragraph("Price vs Range Comparison", normal_style))
+        elements.append(Spacer(1, 0.1*inch))
+        elements.append(render_price_vs_range_matplotlib(specs, inputs, width=6.5*inch, height=4*inch))
+        elements.append(Spacer(1, 0.3*inch))
+
+        # Page break before the last two charts
+        elements.append(PageBreak())
+
+        # Specification Overview
+        elements.append(Paragraph("Specification Overview", normal_style))
+        elements.append(Spacer(1, 0.1*inch))
+        elements.append(render_spec_overview_matplotlib(specs, width=6.5*inch, height=5*inch))
+        elements.append(Spacer(1, 0.3*inch))
+
+        # Cost per Kilometer Analysis
+        elements.append(Paragraph("Cost per Kilometer Analysis", normal_style))
+        elements.append(Spacer(1, 0.1*inch))
+        elements.append(render_cost_per_km_matplotlib(specs, inputs, width=6.5*inch, height=5*inch))
         elements.append(Spacer(1, 0.2*inch))
-        
-        # --- UNIVERSAL PLOTLY → PNG → REPORTLAB IMAGE (WITH FALLBACK) ---
-        def fig_to_image(fig, width=5*inch, height=3*inch,
-                         px_width=1000, px_height=600, scale=2):
-            """
-            Convert a Plotly figure into a ReportLab Image.
-            
-            1. Try plotly → kaleido → PNG
-            2. If kaleido fails, fallback to simple Matplotlib redraw
-            """
-            
-            # --- Attempt 1: Plotly + Kaleido ---
-            try:
-                logging.info("Trying plotly.to_image with kaleido...")
-                
-                img_bytes = pio.to_image(
-                    fig,
-                    format="png",
-                    engine="kaleido",
-                    width=px_width,
-                    height=px_height,
-                    scale=scale
-                )
-                
-                buf = BytesIO(img_bytes)
-                buf.seek(0)
-                
-                return RLImage(
-                    ImageReader(buf),
-                    width=width,
-                    height=height
-                )
-            
-            except Exception as e:
-                logging.exception("Kaleido export failed: %s", e)
-            
-            # --- Attempt 2: Matplotlib fallback ---
-            try:
-                logging.info("Falling back to basic Matplotlib rendering...")
-                
-                # Create MPL canvas with same PDF size
-                fig_mpl, ax = plt.subplots(
-                    figsize=(width/72, height/72),
-                    dpi=72
-                )
 
-                traces = getattr(fig, "data", [])
-                
-                for tr in traces:
-                    x = np.array(getattr(tr, "x", [])) if getattr(tr, "x", None) is not None else None
-                    y = np.array(getattr(tr, "y", [])) if getattr(tr, "y", None) is not None else None
-                    
-                    if x is None or y is None:
-                        continue
-                    
-                    mode = getattr(tr, "mode", "")
-                    
-                    # Scatter
-                    if "markers" in mode or "lines" in mode:
-                        ax.plot(x, y, marker="o")
-                    
-                    # Bar
-                    elif getattr(tr, "type", "") == "bar":
-                        ax.bar(x, y)
-
-                # Titles / axis labels if present
-                try:
-                    layout = fig.layout
-                    if hasattr(layout, "title") and layout.title.text:
-                        ax.set_title(layout.title.text)
-                    if hasattr(layout, "xaxis") and layout.xaxis.title.text:
-                        ax.set_xlabel(layout.xaxis.title.text)
-                    if hasattr(layout, "yaxis") and layout.yaxis.title.text:
-                        ax.set_ylabel(layout.yaxis.title.text)
-                except:
-                    pass
-                
-                ax.grid(True, alpha=0.4)
-                
-                # Render to PNG buffer
-                out = BytesIO()
-                fig_mpl.tight_layout()
-                fig_mpl.savefig(out, format="png", dpi=150)
-                plt.close(fig_mpl)
-                out.seek(0)
-                
-                return RLImage(
-                    ImageReader(out),
-                    width=width,
-                    height=height
-                )
-            
-            except Exception as e:
-                logging.exception("Matplotlib fallback also failed: %s", e)
-                return None  # Return None to trigger table fallback
-        
-        try:
-            # Create the same charts as in the web app
-            # Chart 1: Price vs Range
-            fig1 = go.Figure()
-            fig1.add_trace(go.Scatter(
-                x=[specs['Price_USD']],
-                y=[specs['Range_km']],
-                mode='markers',
-                marker=dict(size=20, color='#4a9eff', symbol='star'),
-                name='Your EV'
-            ))
-            ref_prices = [30000, 45000, 60000, 75000, 90000]
-            ref_ranges = [250, 350, 450, 550, 600]
-            fig1.add_trace(go.Scatter(
-                x=ref_prices,
-                y=ref_ranges,
-                mode='markers',
-                marker=dict(size=8, color='#666666', opacity=0.5),
-                name='Market Average'
-            ))
-            fig1.update_layout(
-                title='Price vs Range Comparison',
-                xaxis_title='Price (USD)',
-                yaxis_title='Range (km)',
-                template='plotly_white',
-                showlegend=True,
-                height=400
-            )
-            
-            elements.append(Paragraph("Price vs Range Comparison", normal_style))
-            elements.append(Spacer(1, 0.1*inch))
-            elements.append(fig_to_image(fig1))
-            elements.append(Spacer(1, 0.3*inch))
-            
-            # Chart 2: Specs Breakdown
-            fig3 = go.Figure()
-            categories = ['Range (km)', 'Battery (kWh)', 'Price (K USD)']
-            values = [specs['Range_km'], specs['Battery_Capacity_kWh'], specs['Price_USD']/1000]
-            fig3.add_trace(go.Bar(
-                x=categories,
-                y=values,
-                marker=dict(color=['#4a9eff', '#60d394', '#ffa07a']),
-                text=[f"{v:.0f}" for v in values],
-                textposition='outside'
-            ))
-            fig3.update_layout(
-                title='Specification Overview',
-                template='plotly_white',
-                showlegend=False,
-                height=400,
-                yaxis={'title': 'Value'}
-            )
-            
-            elements.append(Paragraph("Price vs Range Comparison", normal_style))
-            elements.append(Spacer(1, 0.1*inch))
-            chart1_img = fig_to_image(fig1)
-            if chart1_img:
-                elements.append(chart1_img)
-            else:
-                # Provide data table instead
-                chart_data = [
-                    ['Vehicle', 'Price (USD)', 'Range (km)'],
-                    ['Your EV', f"${specs['Price_USD']:,.0f}", f"{specs['Range_km']:.0f}"]
-                ]
-                chart_table = Table(chart_data, colWidths=[2*inch, 2*inch, 2*inch])
-                chart_table.setStyle(TableStyle([
-                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#e0f2fe')),
-                    ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#1e293b')),
-                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                    ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#cbd5e1'))
-                ]))
-                elements.append(chart_table)
-            elements.append(Spacer(1, 0.3*inch))
-            
-            # Chart 2: Specs Breakdown
-            fig3 = go.Figure()
-            categories = ['Range (km)', 'Battery (kWh)', 'Price (K USD)']
-            values = [specs['Range_km'], specs['Battery_Capacity_kWh'], specs['Price_USD']/1000]
-            fig3.add_trace(go.Bar(
-                x=categories,
-                y=values,
-                marker=dict(color=['#4a9eff', '#60d394', '#ffa07a']),
-                text=[f"{v:.0f}" for v in values],
-                textposition='outside'
-            ))
-            fig3.update_layout(
-                title='Specification Overview',
-                template='plotly_white',
-                showlegend=False,
-                height=400,
-                yaxis={'title': 'Value'}
-            )
-            
-            elements.append(Paragraph("Specification Overview", normal_style))
-            elements.append(Spacer(1, 0.1*inch))
-            chart2_img = fig_to_image(fig3)
-            if chart2_img:
-                elements.append(chart2_img)
-            else:
-                # Provide data table instead
-                spec_data = [
-                    ['Specification', 'Value'],
-                    ['Range', f"{specs['Range_km']:.0f} km"],
-                    ['Battery', f"{specs['Battery_Capacity_kWh']:.0f} kWh"],
-                    ['Price', f"${specs['Price_USD']/1000:.1f}K USD"]
-                ]
-                spec_table = Table(spec_data, colWidths=[3*inch, 3*inch])
-                spec_table.setStyle(TableStyle([
-                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#ccfbf1')),
-                    ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#1e293b')),
-                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                    ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#cbd5e1'))
-                ]))
-                elements.append(spec_table)
-            elements.append(Spacer(1, 0.3*inch))
-            
-            # Chart 3: Cost per Kilometer
-            cost_per_km = specs['Price_USD'] / specs['Range_km']
-            budget_cost_map = {'Budget': 120, 'Mid-Range': 180, 'Luxury': 250}
-            
-            fig4 = go.Figure()
-            fig4.add_trace(go.Bar(
-                x=['Your EV', inputs['C_Budget'] + ' Avg'],
-                y=[cost_per_km, budget_cost_map.get(inputs['C_Budget'], 180)],
-                marker=dict(color=['#4a9eff', '#666666']),
-                text=[f"${cost_per_km:.2f}", f"${budget_cost_map.get(inputs['C_Budget'], 180):.2f}"],
-                textposition='outside'
-            ))
-            fig4.update_layout(
-                title='Cost per Kilometer Analysis',
-                template='plotly_white',
-                showlegend=False,
-                height=400,
-                yaxis={'title': 'USD per km'}
-            )
-            
-            elements.append(Paragraph("Cost per Kilometer Analysis", normal_style))
-            elements.append(Spacer(1, 0.1*inch))
-            chart3_img = fig_to_image(fig4)
-            if chart3_img:
-                elements.append(chart3_img)
-            else:
-                # Provide data table instead
-                cost_data = [
-                    ['Category', 'Cost/km (USD)'],
-                    ['Your EV', f"${cost_per_km:.2f}"],
-                    [f"{inputs['C_Budget']} Average", f"${budget_cost_map.get(inputs['C_Budget'], 180):.2f}"]
-                ]
-                cost_table = Table(cost_data, colWidths=[3*inch, 3*inch])
-                cost_table.setStyle(TableStyle([
-                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#fef3c7')),
-                    ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#1e293b')),
-                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                    ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#cbd5e1'))
-                ]))
-                elements.append(cost_table)
-            
-        except Exception as e:
-            elements.append(Paragraph(f"Note: Chart generation unavailable in deployment environment. Data is provided in tables above.", normal_style))
-        
+        # Page break and footer/project info
         # Add project information footer
         elements.append(PageBreak())
-        elements.append(Spacer(1, 1*inch))
+        elements.append(Spacer(1, 0.5*inch))
         
         footer_title = ParagraphStyle(
             'FooterTitle',
@@ -793,7 +647,7 @@ if st.session_state.generated_specs is not None:
         )
         
         elements.append(Paragraph("PROJECT INFORMATION", footer_title))
-        elements.append(Spacer(1, 0.2*inch))
+        elements.append(Spacer(1, 0.15*inch))
         
         project_info = """
         <b>Project:</b> Generative AI for Electric Vehicle Design<br/>
@@ -815,7 +669,7 @@ if st.session_state.generated_specs is not None:
         💼 LinkedIn: https://www.linkedin.com/in/nabil-ahmed-876b30240/<br/>
         """
         elements.append(Paragraph(project_info, footer_style))
-        elements.append(Spacer(1, 0.3*inch))
+        elements.append(Spacer(1, 0.2*inch))
         
         final_disclaimer = """
         <b><font color="#dc2626">⚠️ FINAL DISCLAIMER:</font></b><br/>
