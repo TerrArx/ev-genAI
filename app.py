@@ -180,6 +180,7 @@ def chatbot_response(user_message, specs_dict, inputs_dict):
     
     Provide a helpful, concise response,addressing their concerns or questions about this EV specs.
     Emulate the energy of the chat and keep it engaging.But always stay professional and under 2-3 lines.
+    Also always maintain the context of the conversation the user is trying to have with you and very smartly and playfully integrate the EV Specification and its configs' usefulness
     """
     
     try:
@@ -893,3 +894,4 @@ if st.session_state.generated_specs is not None:
     
 
     st.markdown("</div>", unsafe_allow_html=True)
+
